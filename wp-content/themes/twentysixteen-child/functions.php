@@ -11,4 +11,19 @@
         wp_get_theme()->get('Version') // Cache-busting goodness.
     );
    }
+
+   add_action( 'init', 'create_fb_project_post_type' ); // Adding 'Project' post type to theme
+    function create_fb_project_post_type() {
+    register_post_type('projects',
+            array(
+                'labels' => array(
+                    'name' => __( 'Project\'s' ),
+                    'singular_name' => __( 'Project' )
+                ),
+            'public' => true,
+            'has_archive' => true,
+            'taxonomies' => array('post_tag')
+            )
+        );
+    }   // Remember to flush & regenerate permalinks!
 ?>
