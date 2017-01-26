@@ -32,25 +32,25 @@ get_header(); ?>
           $my_id = get_the_ID();
         // Here's the meta array for trouble-shootin' purposes
 
-          echo '<pre>';
-          print_r(array_values(get_post_meta( $my_id )));
-          echo '</pre>';
+        //  echo '<pre>';
+        //  print_r(array_values(get_post_meta( $my_id )));
+        //  echo '</pre>';
 
         // Here's the simple way. 
-          the_meta();
+          // the_meta(); 
 
         // And here's the cool way. 
-        /* 
-          $my_client = get_post_meta( $my_id, 'client', false);
-          $my_deadline = get_post_meta( $my_id, 'deadline', false);
-          $my_estimate = get_post_meta( $my_id, 'estimate', false);
         
-          if( ! empty( $my_client ) ) {
-            echo '<h3>Client: ' . $my_client . '<h3>';
+          $my_client = get_post_meta( $my_id, '_mcf_client', true);
+          $my_deadline = get_post_meta( $my_id, '_mcf_deadline', true);
+          $my_estimate = get_post_meta( $my_id, '_mcf_estimate', true);
+        
+        //  if( ! empty( $my_client ) ) {
+            echo '<h3>Client: ' . $my_client . '</h3>';
             echo '<p>Estimate: ' . $my_estimate . '</p>';
             echo '<p>Deadline: ' . $my_deadline . '</p>';
-          } 
-        */
+         // } 
+        
         ?>
 
         <div class="entry-content">
