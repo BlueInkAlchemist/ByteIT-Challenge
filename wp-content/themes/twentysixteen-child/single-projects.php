@@ -34,7 +34,7 @@ get_header(); ?>
 
         //  echo '<pre>';
         //  print_r(array_values(get_post_meta( $my_id )));
-        //  echo '</pre>';
+        //   echo '</pre>';
 
         // Here's the simple way. 
           // the_meta(); 
