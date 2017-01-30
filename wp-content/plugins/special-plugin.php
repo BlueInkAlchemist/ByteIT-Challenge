@@ -3,55 +3,58 @@
 Plugin Name: Special Shortcode Plugin
 Description: A demo plugin for the ByteIT Coding Challenge
 Author: Josh Loomis
-Version: 0.2
+Version: 0.3
 */
 
 class SpecialPluginPage
 {
 
-        // Holds options from plugin page 
-        private $options;
+    // Holds options from plugin page 
+    private $options;
 
-        // Construct the class 
-        public function __construct()
-        {
-                add_action('admin_menu', array($this, 'add_plugin_page'));
-                add_action('admin_init', array($this, 'page_init'));
-        }
+    // Cross-class variable
+    private $shortvar;
 
-        // Add the options page 
-        public function add_plugin_page()
-        {
-                // Located under 'Settings'
-                add_options_page(
-                        'Shortcode Options',
-                        'SSP Options',
-                        'manage_options',
-                        'test-plugin',
-                        array ( $this, 'create_admin_page')
-                );
+    // Construct the class 
+    public function __construct()
+    {
+        add_action('admin_menu', array($this, 'add_plugin_page'));
+        add_action('admin_init', array($this, 'page_init'));
+    }
 
-        }
+    // Add the options page 
+    public function add_plugin_page()
+    {
+        // Located under 'Settings'
+        add_options_page(
+                'Shortcode Options',
+                'SSP Options',
+                'manage_options',
+                'test-plugin',
+                array ( $this, 'create_admin_page')
+        );
 
-        // Callback for our new options page 
-        public function create_admin_page()
-        {
-                // Set class property
-                $this->options = get_option( 'my_option_name' );
-                ?>
-                <div class="wrap">
-                <h1>Special Shortcode Plugin</h1>
-                <form method="post" action="options.php">
-                <?php
-                        // This prints out all hidden setting fields
-                        settings_fields( 'my_option_group' );
-                        do_settings_sections( 'test-plugin' );
-                        submit_button();
-                ?>
-                </form>
-                </div>
-                <?php
-        }
+    }
+
+    // Callback for our new options page 
+    public function create_admin_page()
+    {
+        // Set class property
+        $this->options = get_option( 'my_option_name' );
+        ?>
+        <div class="wrap">
+        <h1>Special Shortcode Plugin</h1>
+        <form method="post" action="options.php">
+        <?php
+                // This prints out all hidden setting fields
+                settings_fields( 'my_option_group' );
+                do_settings_sections( 'test-plugin' );
+                submit_button();
+        ?>
+        </form>
+        </div>
+        <?php
+    }
                 
 
      // Register and add settings
@@ -110,9 +113,40 @@ class SpecialPluginPage
             '<input type="text" id="content" name="my_option_name[content]" value="%s" />',
             isset( $this->options['content'] ) ? esc_attr( $this->options['content']) : ''
         );
+        $shortvar = $this->options['content'];
+    }
+
+    // Instantiate the plugin class  for others to use later
+    public function get_instance()
+    {
+        return $this; // return the object
+    }
+
+}
+
+class PluginShortcode
+{
+    private $var = 'shortput';
+
+    public function __construct()
+    {
+        add_filter( 'get_my_plugin_instance', [ $this, 'get_instance' ] );
+    }
+
+    public function get_instance()
+    {
+        return $this; // return the object
+    }
+
+    public function shortput()
+    {
+        return $this->var; // never echo or print in a shortcode!
     }
 }
 
+add_shortcode( 'i_am_special', [ new PluginShortcode, 'shortput' ] );
+
 if( is_admin() )
-    $my_settings_page = new SpecialPluginPage();
+   $my_settings_page = new SpecialPluginPage();
+ 
 ?>    
