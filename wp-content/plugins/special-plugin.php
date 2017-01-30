@@ -1,152 +1,157 @@
 <?php
 /*
-Plugin Name: Special Shortcode Plugin
+Plugin Name: Special Shortcode Plugin (SSP)
 Description: A demo plugin for the ByteIT Coding Challenge
 Author: Josh Loomis
-Version: 0.3
+Version: 0.4
 */
 
-class SpecialPluginPage
-{
+add_action('init', 'launch_new_special_plugin');
 
-    // Holds options from plugin page 
-    private $options;
-
-    // Cross-class variable
-    private $shortvar;
-
-    // Construct the class 
-    public function __construct()
-    {
-        add_action('admin_menu', array($this, 'add_plugin_page'));
-        add_action('admin_init', array($this, 'page_init'));
-    }
-
-    // Add the options page 
-    public function add_plugin_page()
-    {
-        // Located under 'Settings'
-        add_options_page(
-                'Shortcode Options',
-                'SSP Options',
-                'manage_options',
-                'test-plugin',
-                array ( $this, 'create_admin_page')
-        );
-
-    }
-
-    // Callback for our new options page 
-    public function create_admin_page()
-    {
-        // Set class property
-        $this->options = get_option( 'my_option_name' );
-        ?>
-        <div class="wrap">
-        <h1>Special Shortcode Plugin</h1>
-        <form method="post" action="options.php">
-        <?php
-                // This prints out all hidden setting fields
-                settings_fields( 'my_option_group' );
-                do_settings_sections( 'test-plugin' );
-                submit_button();
-        ?>
-        </form>
-        </div>
-        <?php
-    }
-                
-
-     // Register and add settings
-    public function page_init()
-    {        
-        register_setting(
-            'my_option_group', // Option group
-            'my_option_name', // Option name
-            array( $this, 'sanitize' ) // Sanitize
-        );
-
-        add_settings_section(
-            'setting_section_id', // ID
-            'Shortcode Options', // Title
-            array( $this, 'print_section_info' ), // Callback
-            'test-plugin' // Page
-        );  
-
-        add_settings_field(
-            'content', 
-            'Shortcode Content', 
-            array( $this, 'content_callback' ), 
-            'test-plugin', 
-            'setting_section_id'
-        );      
-    }
-
-    /**
-     * Sanitize each setting field as needed
-     *
-     * @param array $input Contains all settings fields as array keys
-     */
-    public function sanitize( $input )
-    {
-        $new_input = array();
-        if( isset( $input['id_number'] ) )
-            $new_input['id_number'] = absint( $input['id_number'] );
-
-        if( isset( $input['content'] ) )
-            $new_input['content'] = sanitize_text_field( $input['content'] );
-
-        return $new_input;
-    }
-
-    // Print the Section text
-    public function print_section_info()
-    {
-        print 'Enter your settings below:';
-    }
-
-
-    // Get the settings option array and print one of its values
-    public function content_callback()
-    {
-        printf(
-            '<input type="text" id="content" name="my_option_name[content]" value="%s" />',
-            isset( $this->options['content'] ) ? esc_attr( $this->options['content']) : ''
-        );
-        $shortvar = $this->options['content'];
-    }
-
-    // Instantiate the plugin class  for others to use later
-    public function get_instance()
-    {
-        return $this; // return the object
-    }
+function launch_new_special_plugin() {
+    $sp = new SpecialShortcodePlugin();
 
 }
 
-class PluginShortcode
-{
-    private $var = 'shortput';
-
-    public function __construct()
+if (! class_exists('SpecialShortcodePlugin')) {
+    class SpecialShortcodePlugin
     {
-        add_filter( 'get_my_plugin_instance', [ $this, 'get_instance' ] );
+
+        // Define variables
+        private $_name;
+        private $_value;        
+        private $_initialValue;
+        private $_optionName;
+
+        // Construct the class 
+        function __construct()
+        {
+            $this->_name = 'Special Shortcode Plugin';
+            $this->_value = array();
+            $this->_optionName = 'special_shortcode_option';
+
+            $this->loadSettings();
+            $this->init();
+            $this->handlePostback();
+        }
+
+        // Initialize actions
+        function init()
+        {
+            add_action('admin_menu', array($this, 'add_plugin_page'));
+            add_action('admin_init', array($this, 'page_init'));
+            $this->add_shortcodes();
+        }
+
+        // Create shortcode 
+        function add_shortcodes()
+        {
+            add_shortcode( 'i_am_special', array($this, 'the_special_shortcode'));            
+        }
+
+        // Add the options page 
+        function add_plugin_page()
+        {
+            // Located under 'Settings'
+            add_options_page(
+                    'Shortcode Options',
+                    'SSP Options',
+                    'manage_options',
+                    'test-plugin',
+                    array ( $this, 'create_admin_page')
+            );
+
+        }
+
+        // Populate the options page 
+        function create_admin_page()
+        {
+            
+            echo '
+                <div class="wrap">
+                    <h1>Special Shortcode Plugin</h1>
+                    <form method="post" class="shortcode_plugin_form" action="">
+                        <tr>
+                            <th class="scope">
+                              <label for="shortcode_content">Shortcode Content:</label>
+                            </th>
+                            <td>
+                              <input type="text" size="50" name="shortcode_content" value="' .
+                                 $this->get_setting('shortcode_content') . '"/>
+                            </td>
+                        </tr>
+                        <p class="submit"><input type="submit" value="Save Changes" class="button" /></p>
+                    </form>
+                </div>
+                ';
+        }
+   
+        // Feed the shortcode 
+        function the_special_shortcode($content = null)
+        {
+
+            // start output
+            $o = '';
+        
+            // start p  
+            $o .= '<p>';   
+          
+            // test output - it might go here 
+            $o .= 'Text: ';
+            $o .= $this->_get_setting('shortcode_content');
+     
+            // end p
+            $o .= '</p>';
+        
+            // return output
+            return $o;
+
+        }
+
+        // Setting handler
+        function get_setting($setting) {
+            return $this->_value['ssp_cotent'][0][$setting];
+        }
+
+
+        // Load the settings
+         function loadSettings() {
+            $dbValue = get_option($this->_optionName);
+            if (strlen($dbValue) > 0) {
+                $this->_value = json_decode($dbValue,true);
+
+                if (empty($this->_value['ssp_content'][0]['content'])) {
+                    $this->_value['ssp_content'][0]['content'] = '';
+                }
+
+                $this->_initialValue = $this->_value;
+            } else {
+                $deprecated = ' ';
+                $autoload = 'yes';
+                $value = '{"ssp_content":[{"content":""}]}';
+                $result = add_option( $this->_optionName, $value, $deprecated, $autoload );
+                $this->loadSettings();
+            }
+        }
+
+        // Post and save settings
+        function handlePostback() {
+            if (isset($_POST['isPostback'])) {
+                $v = array();
+                $v['ssp_content'][] = array('content' => $_POST['shortcode_content']);
+                $this->_value = $v;
+                $this->save();
+            }
+        }
+
+        function save() {
+            if (($this->_initialValue != $this->_value)) {
+                update_option($this->_optionName, json_encode($this->_value));
+                echo '<div class="updated"><p><strong>settings saved</strong></p></div>';
+            }
+        }
+
     }
-
-    public function get_instance()
-    {
-        return $this; // return the object
-    }
-
-    public function shortput()
-    {
-        return $this->var; // never echo or print in a shortcode!
-    }
-}
-
-add_shortcode( 'i_am_special', [ new PluginShortcode, 'shortput' ] );
-
-if( is_admin() )
-   $my_settings_page = new SpecialPluginPage();
+}    
  
 ?>    
