@@ -3,7 +3,7 @@
 Plugin Name: Special Shortcode Plugin (SSP)
 Description: A demo plugin for the ByteIT Coding Challenge
 Author: Josh Loomis
-Version: 0.4
+Version: 0.4.5
 */
 
 add_action('init', 'launch_new_special_plugin');
@@ -20,7 +20,7 @@ if (! class_exists('SpecialShortcodePlugin')) {
         // Define variables
         private $_name;
         private $_value;        
-        private $_initialValue;
+        private $_options;
         private $_optionName;
 
         // Construct the class 
@@ -30,9 +30,7 @@ if (! class_exists('SpecialShortcodePlugin')) {
             $this->_value = array();
             $this->_optionName = 'special_shortcode_option';
 
-            $this->loadSettings();
             $this->init();
-            $this->handlePostback();
         }
 
         // Initialize actions
@@ -70,17 +68,12 @@ if (! class_exists('SpecialShortcodePlugin')) {
             echo '
                 <div class="wrap">
                     <h1>Special Shortcode Plugin</h1>
-                    <form method="post" class="shortcode_plugin_form" action="">
-                        <tr>
-                            <th class="scope">
-                              <label for="shortcode_content">Shortcode Content:</label>
-                            </th>
-                            <td>
-                              <input type="text" size="50" name="shortcode_content" value="' .
-                                 $this->get_setting('shortcode_content') . '"/>
-                            </td>
-                        </tr>
-                        <p class="submit"><input type="submit" value="Save Changes" class="button" /></p>
+                    <form method="post" class="shortcode_plugin_form" action="options.php">';
+                        // This prints out all hidden setting fields
+                        settings_fields( 'this_option_group' );
+                        do_settings_sections( 'shortcode-setting-admin' );
+                        submit_button(); 
+             echo  '
                     </form>
                 </div>
                 ';
@@ -98,7 +91,7 @@ if (! class_exists('SpecialShortcodePlugin')) {
           
             // test output - it might go here 
             $o .= 'Text: ';
-            $o .= $this->_get_setting('shortcode_content');
+            $o .= get_option('ssp_content');
      
             // end p
             $o .= '</p>';
@@ -108,47 +101,67 @@ if (! class_exists('SpecialShortcodePlugin')) {
 
         }
 
-        // Setting handler
-        function get_setting($setting) {
-            return $this->_value['ssp_cotent'][0][$setting];
+        // Let's handle the settings. 
+        // Initialize admin page 
+        function page_init()
+        {
+            // Register the settings 
+             register_setting(
+                'this_option_group', // Option group
+                'this_option_name', // Option name
+                array( $this, 'sanitize' ) // Sanitize
+            );
+
+            // So far, we have only one section... 
+            add_settings_section(
+                'setting_section_id', // ID
+                'Shortcode Options', // Title
+                array( $this, 'print_section_info' ), // Callback
+                'shortcode-setting-admin' // Page
+            );   
+
+            // ... and one field. But we can add more later!
+            add_settings_field(
+                'ssp_content', // ID
+                'Shortcode Content', // Title
+                array( $this, 'title_callback' ), // Callback
+                'shortcode-setting-admin', // Page
+                'setting_section_id' // Section
+            );   
         }
 
-
-        // Load the settings
-         function loadSettings() {
-            $dbValue = get_option($this->_optionName);
-            if (strlen($dbValue) > 0) {
-                $this->_value = json_decode($dbValue,true);
-
-                if (empty($this->_value['ssp_content'][0]['content'])) {
-                    $this->_value['ssp_content'][0]['content'] = '';
-                }
-
-                $this->_initialValue = $this->_value;
-            } else {
-                $deprecated = ' ';
-                $autoload = 'yes';
-                $value = '{"ssp_content":[{"content":""}]}';
-                $result = add_option( $this->_optionName, $value, $deprecated, $autoload );
-                $this->loadSettings();
-            }
+        /**
+        * Sanitize each setting field as needed
+        *
+        * @param array $input Contains all settings fields as array keys
+        *
+        * (again, we only have one so far, but who knows what the future holds)
+        */
+        function sanitize( $input )
+        {
+            $new_input = array();
+    
+            if( isset( $input['ssp_content'] ) )
+                $new_input['ssp_content'] = sanitize_text_field( $input['ssp_content'] );
+    
+            return $new_input;
         }
 
-        // Post and save settings
-        function handlePostback() {
-            if (isset($_POST['isPostback'])) {
-                $v = array();
-                $v['ssp_content'][] = array('content' => $_POST['shortcode_content']);
-                $this->_value = $v;
-                $this->save();
-            }
+        // Print the section test 
+        function print_section_info()
+        {
+           // print 'Shortcode content:';
         }
 
-        function save() {
-            if (($this->_initialValue != $this->_value)) {
-                update_option($this->_optionName, json_encode($this->_value));
-                echo '<div class="updated"><p><strong>settings saved</strong></p></div>';
-            }
+        /** 
+        * Use a different callback function for each option array and its values 
+        */
+        function title_callback()
+        {
+            printf(
+                '<input type="text" id="title" name="this_option_name[ssp_content]" value="%s" />',
+                isset( $this->_options['ssp_content'] ) ? esc_attr( $this->_options['ssp_content']) : ''
+            );
         }
 
     }
