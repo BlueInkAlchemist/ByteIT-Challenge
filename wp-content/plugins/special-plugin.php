@@ -71,16 +71,12 @@ function ssp_options_page(  ) {
 
 	</form>
 	<?php
+    }
 
-}
+    function ssp_shortcode() {
+        $options = get_option( 'ssp_settings' );
+        return $options['ssp_text_field_0'];
+    }
+    add_shortcode( 'i_am_special', 'ssp_shortcode' );
 
-}
- 
- 
-function ssp_shortcode() {
-    $options = get_option( 'ssp_settings' );
-    return $options['ssp_text_field_0'];
-}
-add_shortcode( 'i_am_special', 'ssp_shortcode' );
- 
 ?>
