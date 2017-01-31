@@ -3,168 +3,84 @@
 Plugin Name: Special Shortcode Plugin (SSP)
 Description: A demo plugin for the ByteIT Coding Challenge
 Author: Josh Loomis
-Version: 0.4.5
+Version: 1.0.0
 */
+add_action( 'admin_menu', 'ssp_add_admin_menu' );
+add_action( 'admin_init', 'ssp_settings_init' );
 
-add_action('init', 'launch_new_special_plugin');
 
-function launch_new_special_plugin() {
-    $sp = new SpecialShortcodePlugin();
+function ssp_add_admin_menu(  ) { 
+
+	add_options_page( 'Special Shortcode', 'Special Shortcode', 'manage_options', 'special_shortcode', 'ssp_options_page' );
 
 }
 
-if (! class_exists('SpecialShortcodePlugin')) {
-    class SpecialShortcodePlugin
-    {
 
-        // Define variables
-        private $_name;
-        private $_value;        
-        private $_options;
-        private $_optionName;
+function ssp_settings_init(  ) { 
 
-        // Construct the class 
-        function __construct()
-        {
-            $this->_name = 'Special Shortcode Plugin';
-            $this->_value = array();
-            $this->_optionName = 'special_shortcode_option';
+	register_setting( 'pluginPage', 'ssp_settings' );
 
-            $this->init();
-        }
+	add_settings_section(
+		'ssp_pluginPage_section', 
+		__( 'Your section description', 'wordpress' ), 
+		'ssp_settings_section_callback', 
+		'pluginPage'
+	);
 
-        // Initialize actions
-        function init()
-        {
-            add_action('admin_menu', array($this, 'add_plugin_page'));
-            add_action('admin_init', array($this, 'page_init'));
-            $this->add_shortcodes();
-        }
+	add_settings_field( 
+		'ssp_text_field_0', 
+		__( 'Settings field description', 'wordpress' ), 
+		'ssp_text_field_0_render', 
+		'pluginPage', 
+		'ssp_pluginPage_section' 
+	);
 
-        // Create shortcode 
-        function add_shortcodes()
-        {
-            add_shortcode( 'i_am_special', array($this, 'the_special_shortcode'));            
-        }
 
-        // Add the options page 
-        function add_plugin_page()
-        {
-            // Located under 'Settings'
-            add_options_page(
-                    'Shortcode Options',
-                    'SSP Options',
-                    'manage_options',
-                    'test-plugin',
-                    array ( $this, 'create_admin_page')
-            );
+}
 
-        }
 
-        // Populate the options page 
-        function create_admin_page()
-        {
-            
-            echo '
-                <div class="wrap">
-                    <h1>Special Shortcode Plugin</h1>
-                    <form method="post" class="shortcode_plugin_form" action="options.php">';
-                        // This prints out all hidden setting fields
-                        settings_fields( 'this_option_group' );
-                        do_settings_sections( 'shortcode-setting-admin' );
-                        submit_button(); 
-             echo  '
-                    </form>
-                </div>
-                ';
-        }
-   
-        // Feed the shortcode 
-        function the_special_shortcode($content = null)
-        {
+function ssp_text_field_0_render(  ) { 
 
-            // start output
-            $o = '';
-        
-            // start p  
-            $o .= '<p>';   
-          
-            // test output - it might go here 
-            $o .= 'Text: ';
-            $o .= get_option('ssp_content');
-     
-            // end p
-            $o .= '</p>';
-        
-            // return output
-            return $o;
+	$options = get_option( 'ssp_settings' );
+	?>
+	<input type='text' name='ssp_settings[ssp_text_field_0]' value='<?php echo $options['ssp_text_field_0']; ?>'>
+	<?php
 
-        }
+}
 
-        // Let's handle the settings. 
-        // Initialize admin page 
-        function page_init()
-        {
-            // Register the settings 
-             register_setting(
-                'this_option_group', // Option group
-                'this_option_name', // Option name
-                array( $this, 'sanitize' ) // Sanitize
-            );
 
-            // So far, we have only one section... 
-            add_settings_section(
-                'setting_section_id', // ID
-                'Shortcode Options', // Title
-                array( $this, 'print_section_info' ), // Callback
-                'shortcode-setting-admin' // Page
-            );   
+function ssp_settings_section_callback(  ) { 
 
-            // ... and one field. But we can add more later!
-            add_settings_field(
-                'ssp_content', // ID
-                'Shortcode Content', // Title
-                array( $this, 'title_callback' ), // Callback
-                'shortcode-setting-admin', // Page
-                'setting_section_id' // Section
-            );   
-        }
+	echo __( 'This section description', 'wordpress' );
 
-        /**
-        * Sanitize each setting field as needed
-        *
-        * @param array $input Contains all settings fields as array keys
-        *
-        * (again, we only have one so far, but who knows what the future holds)
-        */
-        function sanitize( $input )
-        {
-            $new_input = array();
-    
-            if( isset( $input['ssp_content'] ) )
-                $new_input['ssp_content'] = sanitize_text_field( $input['ssp_content'] );
-    
-            return $new_input;
-        }
+}
 
-        // Print the section test 
-        function print_section_info()
-        {
-           // print 'Shortcode content:';
-        }
 
-        /** 
-        * Use a different callback function for each option array and its values 
-        */
-        function title_callback()
-        {
-            printf(
-                '<input type="text" id="title" name="this_option_name[ssp_content]" value="%s" />',
-                isset( $this->_options['ssp_content'] ) ? esc_attr( $this->_options['ssp_content']) : ''
-            );
-        }
+function ssp_options_page(  ) { 
 
-    }
-}    
+	?>
+	<form action='options.php' method='post'>
+
+		<h2>Special Shortcode</h2>
+
+		<?php
+		settings_fields( 'pluginPage' );
+		do_settings_sections( 'pluginPage' );
+		submit_button();
+		?>
+
+	</form>
+	<?php
+
+}
+
+}
  
-?>    
+ 
+function ssp_shortcode() {
+    $options = get_option( 'ssp_settings' );
+    return $options['ssp_text_field_0'];
+}
+add_shortcode( 'i_am_special', 'ssp_shortcode' );
+ 
+?>
