@@ -22,14 +22,14 @@ function ssp_settings_init(  ) {
 
 	add_settings_section(
 		'ssp_pluginPage_section', 
-		__( 'Your section description', 'wordpress' ), 
+		__( '', 'wordpress' ), 
 		'ssp_settings_section_callback', 
 		'pluginPage'
 	);
 
 	add_settings_field( 
 		'ssp_text_field_0', 
-		__( 'Settings field description', 'wordpress' ), 
+		__( 'Shortcode content:', 'wordpress' ), 
 		'ssp_text_field_0_render', 
 		'pluginPage', 
 		'ssp_pluginPage_section' 
@@ -51,7 +51,7 @@ function ssp_text_field_0_render(  ) {
 
 function ssp_settings_section_callback(  ) { 
 
-	echo __( 'This section description', 'wordpress' );
+	echo __( '', 'wordpress' );
 
 }
 
@@ -75,7 +75,7 @@ function ssp_options_page(  ) {
 
     function ssp_shortcode() {
         $options = get_option( 'ssp_settings' );
-        return $options['ssp_text_field_0'];
+        return '<p>'. $options['ssp_text_field_0'] . '</p>';
     }
     add_shortcode( 'i_am_special', 'ssp_shortcode' );
 
