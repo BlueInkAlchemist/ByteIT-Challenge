@@ -13,6 +13,14 @@
    }
    add_action( 'wp_enqueue_scripts', 'my_theme_enqueue_styles' );
 
+   function my_theme_enqueue_scripts() {
+        wp_enqueue_script( 'jquery' );
+        wp_enqueue_script('custom-script', $parent_style, get_template_directory_uri() . '/js/toggle_special.js', array('jquery'));
+
+   }
+   // load js in footer 
+    add_action('wp_footer', 'my_theme_enqueue_scripts');
+
    // Adding 'Project' CPT to theme
     function create_fb_project_post_type() {
     register_post_type('projects',

@@ -6,16 +6,6 @@ Author: Josh Loomis
 Version: 1.1.0
 */
 
-function load_jquery() {
-    wp_enqueue_script( 'jquery' );
-}
-
-function load_toggle() {
-		wp_enqueue_script( 'toggle_special' );
-}
-
-add_action( 'wp_enqueue_script', 'load_jquery' );
-add_action( 'wp_enqueue_script', 'load_toggle' );
 add_action( 'admin_menu', 'ssp_add_admin_menu' );
 add_action( 'admin_init', 'ssp_settings_init' );
 

@@ -38,7 +38,7 @@ get_header(); ?>
 </div><!-- .content-area -->
 
 <?php 
-	if($_SERVER['REQUEST_URI'] == '/') {
+	if( ! is_singular( 'post' )) {
 		get_sidebar();
 	} else {
 		echo '<p>This is an internal page.</p>';
