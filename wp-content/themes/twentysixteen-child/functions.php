@@ -258,7 +258,21 @@
         $myCustomFields_var = new myCustomFields();
     }
 
-    // Add Datepicker Functionality
+    // Register widget areas for internal checkbox goodness.
+    function register_widget_areas() {
+        register_sidebar( array(
+            'name'          => __( ' Internal Widget Area', 'twentysixteen-child' ),
+            'id'            =>'internal-1',
+            'description'   => __( 'Add widgets here to appear in internal pages.', 'twentysixteen-child' ),
+            'before_widget' => '
+    ', 'after_widget' => '
+    ', 'before_title' => '
+    <h2 class="widget-title">', 'after_title' => '</h2>
+    ', ) ); } 
+    
+    add_action( 'widgets_init', 'register_widget_areas' ); ;
+
+    // Add Datepicker Functionality - BONUS
     function enqueue_date_picker(){
         wp_enqueue_script(
             'field-date', 
