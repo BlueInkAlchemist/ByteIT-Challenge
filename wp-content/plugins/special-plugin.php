@@ -89,8 +89,10 @@ function ssp_widget_display($args) {
 	echo "SSP Widget Test";
 	?>
 	<p>&nbsp;</p>
+	<!-- description stuff
   <p><strong>Site Name:</strong> <?php echo $blog_title ?></p>
   <p><strong>Tagline:</strong> <?php echo $tagline ?></p>
+	-->
 	<!-- begin checkbox form & function -->
 	<p>
 	<form id="toggle_form">

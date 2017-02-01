@@ -1,13 +1,16 @@
-jQuery(document).read(function($) {
+jQuery(document).ready(function($) {
 
     $('#shortcode_toggle').change(function() {
         if ($(this).prop('checked')) {
-            // $("#special_zone").toggle("slow", function() {
-            // Animation complete.
-            // });
-            alert("You have elected to show your checkout history."); //checked
+            $("#special_zone").hide("slow", function() {
+                // Animation complete.
+            });
+            // alert("You have elected to turn off the shortcode area."); //checked
         } else {
-            alert("You have elected to turn off checkout history."); //not checked
+            $("#special_zone").show("slow", function() {
+                // Animation complete.
+            });
+            // alert("You have elected to turn on the shortcode area."); //not checked
         }
     });
 
